@@ -23,60 +23,90 @@ try {
 
     $source = [System.IO.File]::ReadAllText($nsiPath).Replace("`r`n", "`n")
 
-    $updateModeBefore = @'
-  ; In update mode, always proceeds without uninstalling
-  ${If} $UpdateMode = 1
-    Goto reinst_done
-  ${EndIf}
-'@
-    $updateModeAfter = @'
-  ; Vibe Manager always removes the installed version before replacing it.
-  ${If} $UpdateMode = 1
-    Goto reinst_uninstall
-  ${EndIf}
-'@
-    if (-not $source.Contains($updateModeBefore)) {
-        throw "The expected Tauri update-mode block changed; refusing to build an unverified installer."
-    }
-    $source = $source.Replace($updateModeBefore, $updateModeAfter)
+    # Match the generated NSIS script by behavior rather than Tauri's comments.
+    # Tauri may change comments and indentation between patch releases, while
+    # these control-flow statements remain the safety-critical integration points.
+    $lines = $source -split "`n"
+    $updateModeCount = 0
+    $updateModeIndex = -1
+    $updateArgumentCount = 0
 
-    $versionBranchBefore = @'
-  ; $R0 holds whether same(0)/upgrading(1)/downgrading(-1) version
-'@
-    $versionBranchAfter = @'
-  ; A version change must always be a clean replacement.
-  ${If} $R0 <> 0
-    Goto reinst_uninstall
-  ${EndIf}
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $line = $lines[$index]
 
-  ; $R0 holds whether same(0)/upgrading(1)/downgrading(-1) version
-'@
-    if (-not $source.Contains($versionBranchBefore)) {
-        throw "The expected Tauri version branch changed; refusing to build an unverified installer."
-    }
-    $source = $source.Replace($versionBranchBefore, $versionBranchAfter)
+        if ($line.Trim() -eq "Goto reinst_done") {
+            $contextStart = [Math]::Max(0, $index - 5)
+            $context = $lines[$contextStart..($index - 1)] -join "`n"
+            if ($context -match '\$\{If\}\s+\$UpdateMode\s*=\s*1') {
+                $indent = [regex]::Match($line, '^\s*').Value
+                $lines[$index] = "${indent}Goto reinst_uninstall"
+                $updateModeCount++
+                $updateModeIndex = $index
+                continue
+            }
+        }
 
-    $updateArgumentBefore = '      ${IfThen} $UpdateMode = 1 ${|} StrCpy $R1 "$R1 /UPDATE" ${|} ; append /UPDATE'
-    $updateArgumentAfter = '      StrCpy $R1 "$R1 /UPDATE" ; preserve app data during every clean replacement'
-    if (-not $source.Contains($updateArgumentBefore)) {
-        throw "The expected Tauri uninstaller invocation changed; refusing to build an unverified installer."
+        if (
+            $line -match
+            '\$\{IfThen\}.*\$UpdateMode\s*=\s*1.*StrCpy\s+\$R1\s+"\$R1 /UPDATE"'
+        ) {
+            $indent = [regex]::Match($line, '^\s*').Value
+            $lines[$index] =
+                "${indent}StrCpy `$R1 `"`$R1 /UPDATE`" ; preserve app data during every clean replacement"
+            $updateArgumentCount++
+        }
     }
-    $source = $source.Replace($updateArgumentBefore, $updateArgumentAfter)
 
-    $optOutBefore = @'
-    !endif
-    ${NSD_OnClick} $R3 PageReinstallUpdateSelection
-'@
-    $optOutAfter = @'
-    !endif
-    ; Do not allow keeping files from another installed version.
-    ${IfThen} $R0 <> 0 ${|} EnableWindow $R3 0 ${|}
-    ${NSD_OnClick} $R3 PageReinstallUpdateSelection
-'@
-    if (-not $source.Contains($optOutBefore)) {
-        throw "The expected Tauri reinstall option changed; refusing to build an unverified installer."
+    if ($updateModeCount -ne 1) {
+        throw "Expected one Tauri update-mode jump, found $updateModeCount; refusing to build an unverified installer."
     }
-    $source = $source.Replace($optOutBefore, $optOutAfter)
+    if ($updateArgumentCount -ne 1) {
+        throw "Expected one Tauri uninstaller update argument, found $updateArgumentCount; refusing to build an unverified installer."
+    }
+
+    $patchedLines = [System.Collections.Generic.List[string]]::new()
+    $versionBranchCount = 0
+    $optOutCount = 0
+
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $line = $lines[$index]
+
+        # The relevant version decision is the one immediately after Tauri's
+        # UpdateMode shortcut, not the earlier branch that prepares page text.
+        if (
+            $index -gt $updateModeIndex -and
+            $line -match '^\s*\$\{If\}\s+\$R0\s*=\s*0(?:\s|;|$)'
+        ) {
+            $indent = [regex]::Match($line, '^\s*').Value
+            [void]$patchedLines.Add("${indent}; A version change must always be a clean replacement.")
+            [void]$patchedLines.Add("${indent}`${If} `$R0 <> 0")
+            [void]$patchedLines.Add("${indent}  Goto reinst_uninstall")
+            [void]$patchedLines.Add("${indent}`${EndIf}")
+            [void]$patchedLines.Add("")
+            $versionBranchCount++
+        }
+
+        if (
+            $line -match
+            '^\s*\$\{NSD_OnClick\}\s+\$R3\s+PageReinstallUpdateSelection\s*$'
+        ) {
+            $indent = [regex]::Match($line, '^\s*').Value
+            [void]$patchedLines.Add("${indent}; Do not allow keeping files from another installed version.")
+            [void]$patchedLines.Add("${indent}`${IfThen} `$R0 <> 0 `${|} EnableWindow `$R3 0 `${|}")
+            $optOutCount++
+        }
+
+        [void]$patchedLines.Add($line)
+    }
+
+    if ($versionBranchCount -ne 1) {
+        throw "Expected one Tauri version branch, found $versionBranchCount; refusing to build an unverified installer."
+    }
+    if ($optOutCount -ne 1) {
+        throw "Expected one Tauri reinstall option, found $optOutCount; refusing to build an unverified installer."
+    }
+
+    $source = $patchedLines -join "`n"
 
     [System.IO.File]::WriteAllText(
         $nsiPath,
