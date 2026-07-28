@@ -6,7 +6,7 @@
   ReadRegStr $R8 SHCTX "${UNINSTKEY}" "DisplayVersion"
   ${If} $R8 != ""
     MessageBox MB_ICONSTOP|MB_OK \
-      "旧バージョン ($R8) のアンインストールが完了していません。$\r$\nインストールを中止します。旧バージョンをアンインストールしてから、もう一度実行してください。"
+      "The previous version ($R8) was not fully uninstalled. Setup will stop. Uninstall the previous version, then try again.$\r$\n$\r$\n旧バージョン ($R8) のアンインストールが完了していません。インストールを中止します。旧バージョンをアンインストールしてから、もう一度実行してください。"
     SetErrorLevel 20
     Quit
   ${EndIf}

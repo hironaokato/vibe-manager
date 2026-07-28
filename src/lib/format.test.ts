@@ -4,10 +4,10 @@ import { canStart, canStop, formatRelative, shortPath } from "./format";
 describe("formatRelative", () => {
   const now = 1_700_000_000_000;
 
-  it("formats recent times in Japanese", () => {
-    expect(formatRelative(now - 5_000, now)).toBe("たった今");
-    expect(formatRelative(now - 120_000, now)).toBe("2分前");
-    expect(formatRelative(now - 7_200_000, now)).toBe("2時間前");
+  it("formats recent times in English followed by Japanese", () => {
+    expect(formatRelative(now - 5_000, now)).toBe("Just now / たった今");
+    expect(formatRelative(now - 120_000, now)).toBe("2m ago / 2分前");
+    expect(formatRelative(now - 7_200_000, now)).toBe("2h ago / 2時間前");
   });
 });
 

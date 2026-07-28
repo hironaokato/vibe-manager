@@ -155,7 +155,7 @@ function App() {
         const next = await managerApi.saveSettings(settings);
         setSnapshot(next);
       },
-      "設定を保存しました",
+      "Settings saved / 設定を保存しました",
     );
   }
 
@@ -174,10 +174,10 @@ function App() {
         setDiscoveryDraft(null);
       },
       editing
-        ? "プロジェクトを更新しました"
+        ? "Project updated / プロジェクトを更新しました"
         : adopting
-          ? "起動中のサーバーを取り込みました"
-          : "プロジェクトを追加しました",
+          ? "Running server imported / 起動中のサーバーを取り込みました"
+          : "Project added / プロジェクトを追加しました",
     );
   }
 
@@ -188,7 +188,7 @@ function App() {
         const next = await managerApi.refreshDiscovery();
         setSnapshot(next);
       },
-      "ローカルサーバーを再スキャンしました",
+      "Local servers rescanned / ローカルサーバーを再スキャンしました",
     );
   }
 
@@ -196,7 +196,7 @@ function App() {
     await perform(
       `ignore-${candidate.key}`,
       () => managerApi.ignoreDiscovery(candidate.key),
-      `${candidate.name} を候補から非表示にしました`,
+      `${candidate.name} hidden from candidates / ${candidate.name} を候補から非表示にしました`,
     );
   }
 
@@ -207,7 +207,7 @@ function App() {
           <Command size={26} />
           <span />
         </div>
-        <p>Vibe Managerを準備しています…</p>
+        <p>Preparing Vibe Manager… / Vibe Managerを準備しています…</p>
       </main>
     );
   }
@@ -246,7 +246,7 @@ function App() {
             onClick={() => setFilter("all")}
           >
             <LayoutDashboard size={17} />
-            すべてのアプリ
+            All apps / すべてのアプリ
             <span>{snapshot.projects.length}</span>
           </button>
           <button
@@ -255,7 +255,7 @@ function App() {
             onClick={() => setFilter("running")}
           >
             <Play size={16} />
-            起動中
+            Running / 起動中
             <span>{snapshot.runningCount}</span>
           </button>
           <button
@@ -264,7 +264,7 @@ function App() {
             onClick={() => setFilter("attention")}
           >
             <AlertTriangle size={16} />
-            確認が必要
+            Attention / 確認が必要
             <span>{snapshot.crashedCount + snapshot.restoreCount}</span>
           </button>
           <button
@@ -273,16 +273,16 @@ function App() {
             onClick={() => setFilter("stopped")}
           >
             <CircleStop size={16} />
-            停止中
+            Stopped / 停止中
           </button>
           <button
             type="button"
-            aria-label="自動検出"
+            aria-label="Automatic discovery / 自動検出"
             className={filter === "discovered" ? "active" : ""}
             onClick={() => setFilter("discovered")}
           >
             <Radar size={16} />
-            自動検出
+            Discovery / 自動検出
             <span>{snapshot.discoveryCount}</span>
           </button>
         </nav>
@@ -293,7 +293,10 @@ function App() {
           </div>
           <div>
             <strong>Manager is active</strong>
-            <small>ウィンドウを閉じても監視します</small>
+            <small>
+              Monitoring continues when closed /
+              ウィンドウを閉じても監視します
+            </small>
           </div>
         </div>
         <button
@@ -302,7 +305,7 @@ function App() {
           onClick={() => setSettingsOpen(true)}
         >
           <Settings size={17} />
-          設定
+          Settings / 設定
           <ChevronRight size={15} />
         </button>
       </aside>
@@ -311,7 +314,7 @@ function App() {
         <header className="topbar">
           <div>
             <p className="eyebrow">LOCAL WORKSPACE</p>
-            <h1>アプリケーション</h1>
+            <h1>Applications / アプリケーション</h1>
           </div>
           <div className="topbar-actions">
             <div className="search-box">
@@ -320,7 +323,7 @@ function App() {
                 ref={searchInput}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="名前、コマンド、パスで検索"
+                placeholder="Search by name, command, or path / 名前、コマンド、パスで検索"
               />
               <kbd>{isMac ? "⌘ K" : "Ctrl K"}</kbd>
             </div>
@@ -330,7 +333,7 @@ function App() {
               onClick={() => setEditingProject(null)}
             >
               <Plus size={17} />
-              追加
+              Add / 追加
             </button>
           </div>
         </header>
@@ -342,9 +345,13 @@ function App() {
             </div>
             <div>
               <strong>
-                前回動いていたアプリが{snapshot.restoreCount}件あります
+                {snapshot.restoreCount} previously running app(s) can be
+                restored / 前回動いていたアプリが{snapshot.restoreCount}件あります
               </strong>
-              <p>内容を確認して、必要なものを復元できます。</p>
+              <p>
+                Review the list and restore what you need. /
+                内容を確認して、必要なものを復元できます。
+              </p>
             </div>
             <button
               type="button"
@@ -354,11 +361,13 @@ function App() {
                 void perform(
                   "restore-all",
                   managerApi.restoreAll,
-                  "復元処理を開始しました",
+                  "Restore started / 復元処理を開始しました",
                 )
               }
             >
-              {busyKey === "restore-all" ? "復元中…" : "すべて復元"}
+              {busyKey === "restore-all"
+                ? "Restoring… / 復元中…"
+                : "Restore all / すべて復元"}
             </button>
           </section>
         )}
@@ -368,28 +377,28 @@ function App() {
             icon={<Play size={17} />}
             label="RUNNING"
             value={snapshot.runningCount}
-            detail="現在起動中"
+            detail="Currently running / 現在起動中"
             tone="green"
           />
           <MetricCard
             icon={<RotateCcw size={17} />}
             label="RESTORE"
             value={snapshot.restoreCount}
-            detail="前回から復元待ち"
+            detail="Pending from last session / 前回から復元待ち"
             tone="violet"
           />
           <MetricCard
             icon={<AlertTriangle size={17} />}
             label="ATTENTION"
             value={snapshot.crashedCount}
-            detail="異常終了を確認"
+            detail="Review crashed apps / 異常終了を確認"
             tone="red"
           />
           <MetricCard
             icon={<Radar size={17} />}
             label="DISCOVERED"
             value={snapshot.discoveryCount}
-            detail="未登録の候補"
+            detail="Unregistered candidates / 未登録の候補"
             tone="blue"
           />
         </section>
@@ -422,21 +431,21 @@ function App() {
             <div>
               <h2>
                 {filter === "all"
-                  ? "すべてのアプリ"
+                  ? "All apps / すべてのアプリ"
                   : filter === "running"
-                    ? "起動中のアプリ"
+                    ? "Running apps / 起動中のアプリ"
                   : filter === "attention"
-                      ? "確認が必要なアプリ"
+                      ? "Apps needing attention / 確認が必要なアプリ"
                       : filter === "stopped"
-                        ? "停止中のアプリ"
-                        : "すべてのアプリ"}
+                        ? "Stopped apps / 停止中のアプリ"
+                        : "All apps / すべてのアプリ"}
               </h2>
-              <span>{projects.length}件</span>
+              <span>{projects.length} item(s) / {projects.length}件</span>
             </div>
             <button
               type="button"
               className="icon-button"
-              title="再読み込み"
+              title="Refresh / 再読み込み"
               onClick={() => void refresh()}
             >
               <RefreshCw size={16} />
@@ -462,9 +471,9 @@ function App() {
                       restart: () => managerApi.restartProject(project.id),
                     };
                     const messages = {
-                      start: `${project.name}を起動しました`,
-                      stop: `${project.name}を停止しました`,
-                      restart: `${project.name}を再起動しました`,
+                      start: `${project.name} started / ${project.name}を起動しました`,
+                      stop: `${project.name} stopped / ${project.name}を停止しました`,
+                      restart: `${project.name} restarted / ${project.name}を再起動しました`,
                     };
                     void perform(project.id, actions[action], messages[action]);
                   }}
@@ -482,13 +491,13 @@ function App() {
                   onDelete={() => {
                     if (
                       window.confirm(
-                        `「${project.name}」をVibe Managerから削除しますか？\nプロジェクトのファイル自体は削除されません。`,
+                        `Remove “${project.name}” from Vibe Manager?\nThe project files will not be deleted.\n\n「${project.name}」をVibe Managerから削除しますか？\nプロジェクトのファイル自体は削除されません。`,
                       )
                     ) {
                       void perform(
                         project.id,
                         () => managerApi.deleteProject(project.id),
-                        "登録を削除しました",
+                        "Registration removed / 登録を削除しました",
                       );
                     }
                   }}
@@ -545,7 +554,7 @@ function App() {
             await perform(
               "settings",
               managerApi.clearIgnoredDiscovery,
-              "非表示にした候補をリセットしました",
+              "Hidden candidates reset / 非表示にした候補をリセットしました",
             );
           }}
           onSave={async (settings) => {
@@ -598,12 +607,16 @@ function DiscoverySection({
             <Radar size={16} />
           </div>
           <div className="discovery-title">
-            <h2>起動中の未登録サーバー</h2>
+            <h2>Running unregistered servers / 起動中の未登録サーバー</h2>
             <p>
+              Detected from listening ports and running processes. Vibe Manager
+              will not stop or restart them until imported. /
               待受ポートと実行プロセスから検出しました。取り込むまでは停止・再起動しません。
             </p>
           </div>
-          <span>{candidates.length}件</span>
+          <span>
+            {candidates.length} item(s) / {candidates.length}件
+          </span>
         </div>
         <button
           type="button"
@@ -612,15 +625,20 @@ function DiscoverySection({
           onClick={onScan}
         >
           <RefreshCw size={14} className={scanning ? "spin" : ""} />
-          {scanning ? "スキャン中" : "再スキャン"}
+          {scanning ? "Scanning… / スキャン中" : "Rescan / 再スキャン"}
         </button>
       </header>
 
       {visibleCandidates.length === 0 ? (
         <div className="discovery-empty">
           <Radar size={23} />
-          <strong>未登録の開発サーバーは見つかりませんでした</strong>
+          <strong>
+            No unregistered development servers found /
+            未登録の開発サーバーは見つかりませんでした
+          </strong>
           <span>
+            Start a server and rescan, or check the watched folders in
+            Settings. /
             サーバーを起動してから再スキャンするか、設定で監視フォルダーを確認してください。
           </span>
         </div>
@@ -636,14 +654,20 @@ function DiscoverySection({
                 <div>
                   <h3>{candidate.name}</h3>
                   <span>{candidate.processType}</span>
-                  <span>確度 {candidate.confidence}%</span>
+                  <span>
+                    Confidence {candidate.confidence}% / 確度{" "}
+                    {candidate.confidence}%
+                  </span>
                   {candidate.externalExposure && (
-                    <span className="exposure-badge">LAN公開</span>
+                    <span className="exposure-badge">
+                      LAN exposed / LAN公開
+                    </span>
                   )}
                 </div>
                 <p title={candidate.directory}>
                   <FolderOpen size={12} />
-                  {candidate.directory || "作業フォルダーを取得できませんでした"}
+                  {candidate.directory ||
+                    "Workspace unavailable / 作業フォルダーを取得できませんでした"}
                 </p>
                 <code title={candidate.command}>{candidate.command}</code>
               </div>
@@ -655,7 +679,7 @@ function DiscoverySection({
                 <button
                   type="button"
                   className="icon-button"
-                  title={`${candidate.url} を開く`}
+                  title={`Open ${candidate.url} / ${candidate.url} を開く`}
                   onClick={() => onOpen(candidate)}
                 >
                   <ExternalLink size={15} />
@@ -666,14 +690,14 @@ function DiscoverySection({
                   disabled={busyKey === `ignore-${candidate.key}`}
                   onClick={() => onIgnore(candidate)}
                 >
-                  非表示
+                  Hide / 非表示
                 </button>
                 <button
                   type="button"
                   className="primary-button candidate-import-button"
                   onClick={() => onImport(candidate)}
                 >
-                  取り込む
+                  Import / 取り込む
                 </button>
               </div>
             </article>
@@ -687,7 +711,8 @@ function DiscoverySection({
           className="discovery-more-button"
           onClick={onShowAll}
         >
-          ほか {candidates.length - visibleCandidates.length}件を表示
+          Show {candidates.length - visibleCandidates.length} more / ほか{" "}
+          {candidates.length - visibleCandidates.length}件を表示
           <ChevronRight size={14} />
         </button>
       )}
@@ -764,7 +789,9 @@ function ProjectRow({
             </span>
             {project.status === "running" &&
               project.processOrigin === "external" && (
-                <span className="status-badge badge-external">外部起動</span>
+                <span className="status-badge badge-external">
+                  External / 外部起動
+                </span>
               )}
           </div>
           <p title={project.directory}>
@@ -781,7 +808,9 @@ function ProjectRow({
       <div className="project-time">
         <Clock3 size={14} />
         <span>
-          {project.status === "running" ? "起動 " : "更新 "}
+          {project.status === "running"
+            ? "Started / 起動 "
+            : "Updated / 更新 "}
           {formatRelative(latestTime)}
         </span>
         {project.pid && <small>PID {project.pid}</small>}
@@ -792,7 +821,7 @@ function ProjectRow({
           <button
             type="button"
             className="icon-button"
-            title="ブラウザで開く"
+            title="Open in browser / ブラウザで開く"
             onClick={() => onOpen("url")}
           >
             <ExternalLink size={16} />
@@ -801,7 +830,7 @@ function ProjectRow({
         <button
           type="button"
           className="icon-button"
-          title="ログを見る"
+          title="View logs / ログを見る"
           onClick={onLogs}
         >
           <FileTerminal size={16} />
@@ -810,7 +839,7 @@ function ProjectRow({
           <button
             type="button"
             className="icon-button"
-            title="その他"
+            title="More / その他"
             onClick={() => setMenuOpen((open) => !open)}
           >
             <MoreHorizontal size={18} />
@@ -818,16 +847,16 @@ function ProjectRow({
           {menuOpen && (
             <div className="more-menu" onMouseLeave={() => setMenuOpen(false)}>
               <button type="button" onClick={() => onOpen("directory")}>
-                <FolderOpen size={15} /> フォルダーを開く
+                <FolderOpen size={15} /> Open folder / フォルダーを開く
               </button>
               <button type="button" onClick={() => onOpen("terminal")}>
-                <TerminalSquare size={15} /> ターミナルを開く
+                <TerminalSquare size={15} /> Open terminal / ターミナルを開く
               </button>
               <button type="button" onClick={() => onOpen("editor")}>
-                <Github size={15} /> VS Codeで開く
+                <Github size={15} /> Open in VS Code / VS Codeで開く
               </button>
               <button type="button" onClick={onEdit}>
-                <SquarePen size={15} /> 編集
+                <SquarePen size={15} /> Edit / 編集
               </button>
               <button
                 type="button"
@@ -835,7 +864,7 @@ function ProjectRow({
                 onClick={onDelete}
                 disabled={project.status === "running"}
               >
-                <Trash2 size={15} /> 登録を削除
+                <Trash2 size={15} /> Remove / 登録を削除
               </button>
             </div>
           )}
@@ -848,7 +877,7 @@ function ProjectRow({
             <button
               type="button"
               className="restart-button"
-              title="再起動"
+              title="Restart / 再起動"
               disabled={busy}
               onClick={() => onAction("restart")}
             >
@@ -861,7 +890,7 @@ function ProjectRow({
               onClick={() => onAction("stop")}
             >
               <CircleStop size={15} />
-              {busy ? "処理中" : "停止"}
+              {busy ? "Working… / 処理中" : "Stop / 停止"}
             </button>
           </>
         ) : canStart(project.status) ? (
@@ -879,14 +908,14 @@ function ProjectRow({
               <Play size={15} />
             )}
             {busy
-              ? "処理中"
+              ? "Working… / 処理中"
               : project.status === "crashed"
-                ? "再起動"
-                : "起動"}
+                ? "Restart / 再起動"
+                : "Start / 起動"}
           </button>
         ) : (
           <button type="button" className="pending-button" disabled>
-            <RefreshCw size={15} className="spin" /> 処理中
+            <RefreshCw size={15} className="spin" /> Working… / 処理中
           </button>
         )}
       </div>
@@ -896,7 +925,10 @@ function ProjectRow({
           <AlertTriangle size={14} />
           {project.lastError}
           {project.lastExitCode !== undefined && (
-            <span>終了コード {project.lastExitCode}</span>
+            <span>
+              Exit code {project.lastExitCode} / 終了コード{" "}
+              {project.lastExitCode}
+            </span>
           )}
         </div>
       )}
@@ -918,17 +950,17 @@ function EmptyState({
       </div>
       <h3>
         {hasProjects
-          ? "条件に一致するアプリがありません"
-          : "最初のアプリを登録しましょう"}
+          ? "No apps match / 条件に一致するアプリがありません"
+          : "Add your first app / 最初のアプリを登録しましょう"}
       </h3>
       <p>
         {hasProjects
-          ? "フィルターまたは検索条件を変更してください。"
-          : "普段ターミナルで実行しているフォルダーとコマンドを登録します。"}
+          ? "Change the filter or search terms. / フィルターまたは検索条件を変更してください。"
+          : "Register the folder and command you normally use in the terminal. / 普段ターミナルで実行しているフォルダーとコマンドを登録します。"}
       </p>
       {!hasProjects && (
         <button type="button" className="primary-button" onClick={onAdd}>
-          <Plus size={16} /> プロジェクトを追加
+          <Plus size={16} /> Add project / プロジェクトを追加
         </button>
       )}
     </div>
@@ -946,7 +978,7 @@ function ErrorToast({
     <button type="button" className="error-toast" onClick={onClose}>
       <AlertTriangle size={17} />
       <span>{message}</span>
-      <small>閉じる</small>
+      <small>Close / 閉じる</small>
     </button>
   );
 }

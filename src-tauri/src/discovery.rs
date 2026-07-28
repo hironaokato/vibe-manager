@@ -211,7 +211,7 @@ fn classify_runtime(process_name: &str) -> (String, u8) {
     } else if process_name.contains("ruby") {
         ("Ruby".into(), 35)
     } else {
-        ("ローカルサーバー".into(), 0)
+        ("Local server / ローカルサーバー".into(), 0)
     }
 }
 

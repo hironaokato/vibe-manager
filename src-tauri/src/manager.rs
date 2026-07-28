@@ -49,9 +49,16 @@ impl AppState {
         let data_dir = app
             .path()
             .app_data_dir()
-            .map_err(|error| format!("アプリデータの保存先を取得できません: {error}"))?;
-        fs::create_dir_all(data_dir.join("logs"))
-            .map_err(|error| format!("保存先を作成できません: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "Could not resolve the app data directory: {error} / アプリデータの保存先を取得できません: {error}"
+                )
+            })?;
+        fs::create_dir_all(data_dir.join("logs")).map_err(|error| {
+            format!(
+                "Could not create the data directory: {error} / 保存先を作成できません: {error}"
+            )
+        })?;
 
         let state_path = data_dir.join(STATE_FILE);
         let store = if state_path.exists() {
@@ -182,7 +189,10 @@ impl AppState {
                 project.status,
                 ProjectStatus::Running | ProjectStatus::Starting | ProjectStatus::Stopping
             ) {
-                return Err("実行中のプロジェクトは編集できません。先に停止してください。".into());
+                return Err(
+                    "A running project cannot be edited. Stop it first. / 実行中のプロジェクトは編集できません。先に停止してください。"
+                        .into(),
+                );
             }
             project.name = input.name;
             project.directory = input.directory;
@@ -211,12 +221,15 @@ impl AppState {
                 .projects
                 .iter()
                 .find(|project| project.id == id)
-                .ok_or_else(|| "プロジェクトが見つかりません。".to_string())?;
+                .ok_or_else(|| "Project not found. / プロジェクトが見つかりません。".to_string())?;
             if matches!(
                 project.status,
                 ProjectStatus::Running | ProjectStatus::Starting | ProjectStatus::Stopping
             ) {
-                return Err("実行中のプロジェクトは削除できません。先に停止してください。".into());
+                return Err(
+                    "A running project cannot be removed. Stop it first. / 実行中のプロジェクトは削除できません。先に停止してください。"
+                        .into(),
+                );
             }
             store.projects.retain(|project| project.id != id);
             self.persist_locked(&store)?;
@@ -227,7 +240,7 @@ impl AppState {
 
     pub fn start_project(&self, app: &AppHandle, id: &str) -> Result<(), String> {
         if self.inner.quitting.load(Ordering::SeqCst) {
-            return Err("Vibe Managerを終了中です。".into());
+            return Err("Vibe Manager is quitting. / Vibe Managerを終了中です。".into());
         }
 
         let project = {
@@ -276,7 +289,9 @@ impl AppState {
         let mut child = match command.spawn() {
             Ok(child) => child,
             Err(error) => {
-                let message = format!("コマンドを起動できません: {error}");
+                let message = format!(
+                    "Could not start the command: {error} / コマンドを起動できません: {error}"
+                );
                 self.mark_start_failed(app, id, &message);
                 return Err(message);
             }
@@ -420,7 +435,7 @@ impl AppState {
                 .iter()
                 .find(|project| project.id == id)
                 .map(|project| PathBuf::from(&project.log_path))
-                .ok_or_else(|| "プロジェクトが見つかりません。".to_string())?
+                .ok_or_else(|| "Project not found. / プロジェクトが見つかりません。".to_string())?
         };
         read_log_tail(&path)
     }
@@ -433,11 +448,11 @@ impl AppState {
                 .iter()
                 .find(|project| project.id == id)
                 .map(|project| PathBuf::from(&project.log_path))
-                .ok_or_else(|| "プロジェクトが見つかりません。".to_string())?
+                .ok_or_else(|| "Project not found. / プロジェクトが見つかりません。".to_string())?
         };
-        File::create(path)
-            .map(|_| ())
-            .map_err(|error| format!("ログを消去できません: {error}"))
+        File::create(path).map(|_| ()).map_err(|error| {
+            format!("Could not clear the log: {error} / ログを消去できません: {error}")
+        })
     }
 
     pub fn discovery_candidate(&self, key: &str) -> Option<DiscoveryCandidate> {
@@ -748,7 +763,12 @@ impl AppState {
             };
             for (id, pid) in detached {
                 if !process_exists(pid) {
-                    state.mark_unexpected_exit(&app, &id, None, "プロセスが見つかりません。");
+                    state.mark_unexpected_exit(
+                        &app,
+                        &id,
+                        None,
+                        "Process not found. / プロセスが見つかりません。",
+                    );
                 }
             }
         });
@@ -791,16 +811,18 @@ impl AppState {
                     &id,
                     status.code(),
                     if status.success() {
-                        "プロセスが終了しました。"
+                        "Process exited. / プロセスが終了しました。"
                     } else {
-                        "プロセスがエラー終了しました。"
+                        "Process exited with an error. / プロセスがエラー終了しました。"
                     },
                 ),
                 Err(error) => state.mark_unexpected_exit(
                     &app,
                     &id,
                     None,
-                    &format!("終了状態を取得できません: {error}"),
+                    &format!(
+                        "Could not determine the exit status: {error} / 終了状態を取得できません: {error}"
+                    ),
                 ),
             }
         });
@@ -873,25 +895,36 @@ impl AppState {
     }
 
     fn persist_locked(&self, store: &PersistedState) -> Result<(), String> {
-        let contents = serde_json::to_string_pretty(store)
-            .map_err(|error| format!("状態を保存用に変換できません: {error}"))?;
-        fs::write(self.inner.data_dir.join(STATE_FILE), contents)
-            .map_err(|error| format!("状態を保存できません: {error}"))
+        let contents = serde_json::to_string_pretty(store).map_err(|error| {
+            format!("Could not serialize state: {error} / 状態を保存用に変換できません: {error}")
+        })?;
+        fs::write(self.inner.data_dir.join(STATE_FILE), contents).map_err(|error| {
+            format!("Could not save state: {error} / 状態を保存できません: {error}")
+        })
     }
 
     fn emit_changed(&self, app: &AppHandle) {
         let snapshot = self.snapshot();
         let tooltip = if snapshot.crashed_count > 0 {
-            format!("Vibe Manager • {}件が異常終了", snapshot.crashed_count)
+            format!(
+                "Vibe Manager • {} crashed / {}件が異常終了",
+                snapshot.crashed_count, snapshot.crashed_count
+            )
         } else if snapshot.restore_count > 0 {
-            format!("Vibe Manager • {}件が復元待ち", snapshot.restore_count)
+            format!(
+                "Vibe Manager • {} pending restore / {}件が復元待ち",
+                snapshot.restore_count, snapshot.restore_count
+            )
         } else if snapshot.discovery_count > 0 {
             format!(
-                "Vibe Manager • {}件のローカルサーバーを検出",
-                snapshot.discovery_count
+                "Vibe Manager • {} local server(s) discovered / {}件のローカルサーバーを検出",
+                snapshot.discovery_count, snapshot.discovery_count
             )
         } else {
-            format!("Vibe Manager • {}件が起動中", snapshot.running_count)
+            format!(
+                "Vibe Manager • {} running / {}件が起動中",
+                snapshot.running_count, snapshot.running_count
+            )
         };
         if let Some(tray) = app.tray_by_id("main") {
             let _ = tray.set_tooltip(Some(tooltip));
@@ -957,7 +990,7 @@ fn find_project_mut<'a>(
         .projects
         .iter_mut()
         .find(|project| project.id == id)
-        .ok_or_else(|| "プロジェクトが見つかりません。".to_string())
+        .ok_or_else(|| "Project not found. / プロジェクトが見つかりません。".to_string())
 }
 
 fn validate_input(mut input: ProjectInput) -> Result<ProjectInput, String> {
@@ -970,21 +1003,30 @@ fn validate_input(mut input: ProjectInput) -> Result<ProjectInput, String> {
         .filter(|url| !url.is_empty());
 
     if input.name.is_empty() {
-        return Err("プロジェクト名を入力してください。".into());
+        return Err("Enter a project name. / プロジェクト名を入力してください。".into());
     }
     if input.command.is_empty() {
-        return Err("起動コマンドを入力してください。".into());
+        return Err("Enter a launch command. / 起動コマンドを入力してください。".into());
     }
     let directory = Path::new(&input.directory);
     if !directory.exists() {
-        return Err("指定した作業ディレクトリが見つかりません。".into());
+        return Err(
+            "The specified working directory was not found. / 指定した作業ディレクトリが見つかりません。"
+                .into(),
+        );
     }
     if !directory.is_dir() {
-        return Err("作業ディレクトリにはフォルダーを指定してください。".into());
+        return Err(
+            "The working directory must be a folder. / 作業ディレクトリにはフォルダーを指定してください。"
+                .into(),
+        );
     }
     if let Some(url) = &input.url {
         if !(url.starts_with("http://") || url.starts_with("https://")) {
-            return Err("URLはhttp://またはhttps://から入力してください。".into());
+            return Err(
+                "The URL must start with http:// or https://. / URLはhttp://またはhttps://から入力してください。"
+                    .into(),
+            );
         }
     }
     Ok(input)
@@ -994,19 +1036,24 @@ fn prepare_log(path: &str, project: &ProjectRecord) -> Result<(), String> {
     let path = Path::new(path);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)
-            .map_err(|error| format!("ログフォルダーを作成できません: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "Could not create the log folder: {error} / ログフォルダーを作成できません: {error}"
+                )
+            })?;
     }
     if path.metadata().map(|meta| meta.len()).unwrap_or(0) > MAX_LOG_BYTES {
         let rotated = path.with_extension("previous.log");
         let _ = fs::remove_file(&rotated);
-        fs::rename(path, rotated)
-            .map_err(|error| format!("ログをローテーションできません: {error}"))?;
+        fs::rename(path, rotated).map_err(|error| {
+            format!("Could not rotate the log: {error} / ログをローテーションできません: {error}")
+        })?;
     }
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(path)
-        .map_err(|error| format!("ログを開けません: {error}"))?;
+        .map_err(|error| format!("Could not open the log: {error} / ログを開けません: {error}"))?;
     writeln!(
         file,
         "\n[{}] --- Starting {} ---\n[CMD] {}\n[CWD] {}",
@@ -1015,29 +1062,33 @@ fn prepare_log(path: &str, project: &ProjectRecord) -> Result<(), String> {
         project.command,
         project.directory
     )
-    .map_err(|error| format!("ログを書き込めません: {error}"))
+    .map_err(|error| format!("Could not write to the log: {error} / ログを書き込めません: {error}"))
 }
 
 fn write_adopted_log(path: &str, project: &ProjectRecord) -> Result<(), String> {
     let path = Path::new(path);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)
-            .map_err(|error| format!("ログフォルダーを作成できません: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "Could not create the log folder: {error} / ログフォルダーを作成できません: {error}"
+                )
+            })?;
     }
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(path)
-        .map_err(|error| format!("ログを開けません: {error}"))?;
+        .map_err(|error| format!("Could not open the log: {error} / ログを開けません: {error}"))?;
     writeln!(
         file,
         "[{}] --- Adopted external process {} (PID {}) ---\n\
-         [VIBE] 取り込み前のログは取得できません。次回Vibe Managerから起動すると記録されます。",
+         [VIBE] Logs from before import are unavailable. They will be recorded the next time the process is started from Vibe Manager. / 取り込み前のログは取得できません。次回Vibe Managerから起動すると記録されます。",
         timestamp_label(),
         project.name,
         project.pid.unwrap_or_default()
     )
-    .map_err(|error| format!("ログを書き込めません: {error}"))
+    .map_err(|error| format!("Could not write to the log: {error} / ログを書き込めません: {error}"))
 }
 
 fn open_shared_log(path: &str) -> Result<Arc<Mutex<File>>, String> {
@@ -1046,7 +1097,7 @@ fn open_shared_log(path: &str) -> Result<Arc<Mutex<File>>, String> {
         .append(true)
         .open(path)
         .map(|file| Arc::new(Mutex::new(file)))
-        .map_err(|error| format!("ログを開けません: {error}"))
+        .map_err(|error| format!("Could not open the log: {error} / ログを開けません: {error}"))
 }
 
 fn pump_output<R: Read + Send + 'static>(
@@ -1078,23 +1129,31 @@ fn lock_file(file: &Arc<Mutex<File>>) -> MutexGuard<'_, File> {
 
 fn read_log_tail(path: &Path) -> Result<String, String> {
     if !path.exists() {
-        return Ok("まだログはありません。".into());
+        return Ok("No logs yet. / まだログはありません。".into());
     }
-    let mut file = File::open(path).map_err(|error| format!("ログを開けません: {error}"))?;
+    let mut file = File::open(path)
+        .map_err(|error| format!("Could not open the log: {error} / ログを開けません: {error}"))?;
     let len = file
         .metadata()
-        .map_err(|error| format!("ログ情報を取得できません: {error}"))?
+        .map_err(|error| {
+            format!("Could not read log metadata: {error} / ログ情報を取得できません: {error}")
+        })?
         .len();
     let start = len.saturating_sub(LOG_READ_BYTES);
-    file.seek(SeekFrom::Start(start))
-        .map_err(|error| format!("ログを読み取れません: {error}"))?;
+    file.seek(SeekFrom::Start(start)).map_err(|error| {
+        format!("Could not read the log: {error} / ログを読み取れません: {error}")
+    })?;
     let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes)
-        .map_err(|error| format!("ログを読み取れません: {error}"))?;
+    file.read_to_end(&mut bytes).map_err(|error| {
+        format!("Could not read the log: {error} / ログを読み取れません: {error}")
+    })?;
     let mut text = String::from_utf8_lossy(&bytes).into_owned();
     if start > 0 {
         if let Some(first_newline) = text.find('\n') {
-            text = format!("…（先頭部分を省略）\n{}", &text[first_newline + 1..]);
+            text = format!(
+                "… (earlier content omitted) / （先頭部分を省略）\n{}",
+                &text[first_newline + 1..]
+            );
         }
     }
     Ok(text)
@@ -1300,7 +1359,7 @@ mod tests {
         );
         fs::write(&path, contents).unwrap();
         let tail = read_log_tail(&path).unwrap();
-        assert!(tail.starts_with("…（先頭部分を省略）"));
+        assert!(tail.starts_with("… (earlier content omitted) / （先頭部分を省略）"));
         assert!(tail.ends_with("last line"));
     }
 }

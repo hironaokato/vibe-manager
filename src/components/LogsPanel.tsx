@@ -10,7 +10,9 @@ interface LogsPanelProps {
 }
 
 export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
-  const [logs, setLogs] = useState("ログを読み込んでいます…");
+  const [logs, setLogs] = useState(
+    "Loading logs… / ログを読み込んでいます…",
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -53,7 +55,10 @@ export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
   }
 
   return (
-    <aside className="logs-panel" aria-label={`${project.name}のログ`}>
+    <aside
+      className="logs-panel"
+      aria-label={`Logs for ${project.name} / ${project.name}のログ`}
+    >
       <header>
         <div className="logs-title">
           <span className="terminal-icon">
@@ -68,7 +73,7 @@ export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
           <button
             type="button"
             className="icon-button"
-            title="再読み込み"
+            title="Refresh / 再読み込み"
             onClick={() => void refresh()}
           >
             <RefreshCw size={16} className={refreshing ? "spin" : ""} />
@@ -76,7 +81,7 @@ export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
           <button
             type="button"
             className="icon-button"
-            title="コピー"
+            title="Copy / コピー"
             onClick={() => void copyLogs()}
           >
             <Copy size={16} />
@@ -84,7 +89,7 @@ export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
           <button
             type="button"
             className="icon-button"
-            title="ログを消去"
+            title="Clear logs / ログを消去"
             onClick={() => void clearLogs()}
           >
             <Eraser size={16} />
@@ -92,22 +97,24 @@ export function LogsPanel({ project, onClose, onError }: LogsPanelProps) {
           <button
             type="button"
             className="icon-button"
-            title="閉じる"
+            title="Close / 閉じる"
             onClick={onClose}
           >
             <X size={17} />
           </button>
         </div>
       </header>
-      {copied && <div className="copied-toast">コピーしました</div>}
+      {copied && (
+        <div className="copied-toast">Copied / コピーしました</div>
+      )}
       <pre>{logs}</pre>
       <footer>
         <span
           className={`live-dot ${project.status === "running" ? "" : "muted"}`}
         />
         {project.status === "running"
-          ? "自動更新中"
-          : "プロセスは停止しています"}
+          ? "Auto-refreshing / 自動更新中"
+          : "Process is stopped / プロセスは停止しています"}
       </footer>
     </aside>
   );

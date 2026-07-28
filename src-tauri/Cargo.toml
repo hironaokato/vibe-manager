@@ -1,6 +1,6 @@
 [package]
 name = "vibe-manager"
-version = "0.2.1"
+version = "0.3.0"
 description = "A local development process manager for Windows and macOS"
 authors = ["Vibe Manager contributors"]
 edition = "2021"

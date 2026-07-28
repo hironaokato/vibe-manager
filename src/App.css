@@ -32,11 +32,11 @@ button:disabled { cursor: not-allowed; opacity: 0.58; }
 
 .app-shell {
   display: grid;
-  grid-template-columns: 224px minmax(0, 1fr);
+  grid-template-columns: 252px minmax(0, 1fr);
   height: 100%;
   background: radial-gradient(circle at 85% 0%, rgba(105, 77, 197, 0.07), transparent 32%), var(--bg);
 }
-.app-shell.with-logs { grid-template-columns: 224px minmax(520px, 1fr) minmax(330px, 38%); }
+.app-shell.with-logs { grid-template-columns: 252px minmax(520px, 1fr) minmax(330px, 38%); }
 
 .sidebar {
   display: flex;
@@ -98,6 +98,7 @@ button:disabled { cursor: not-allowed; opacity: 0.58; }
   border: 0;
   border-radius: 8px;
   color: #8d91a0;
+  font-size: 9px;
   background: transparent;
   font-size: 12px;
   text-align: left;
@@ -362,7 +363,7 @@ kbd {
 .project-row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(220px, 1.35fr) minmax(135px, 0.85fr) 105px auto 112px;
+  grid-template-columns: minmax(220px, 1.35fr) minmax(135px, 0.85fr) 115px auto 132px;
   align-items: center;
   min-height: 69px;
   gap: 12px;
@@ -1057,8 +1058,16 @@ input:checked + .switch::after { transform: translateX(15px); background: white;
 }
 .hero-icon.small { width: 47px; height: 47px; margin-bottom: 16px; border-radius: 14px; }
 .onboarding-content h1 { margin: 0; font-size: 28px; line-height: 1.35; letter-spacing: -0.045em; }
+.onboarding-content h1 .bilingual-heading {
+  display: block;
+  margin-top: 4px;
+  color: #a9adbb;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
 .onboarding-copy { max-width: 430px; margin: 14px 0 0; color: #9094a2; font-size: 11px; line-height: 1.8; }
-.feature-row { display: flex; gap: 17px; margin-top: 22px; }
+.feature-row { display: flex; flex-wrap: wrap; gap: 10px 17px; margin-top: 22px; }
 .feature-row span { display: flex; align-items: center; gap: 5px; color: #777b89; font-size: 9px; }
 .feature-row svg { color: var(--green); }
 .choice-card { border: 1px solid #2b2d37; border-radius: 10px; color: inherit; background: #111219; }
@@ -1144,7 +1153,7 @@ input:checked + .switch::after { transform: translateX(15px); background: white;
 
 @media (max-width: 980px) {
   .metric-grid { grid-template-columns: repeat(2, 1fr); }
-  .project-row { grid-template-columns: minmax(210px, 1.3fr) minmax(120px, 0.8fr) auto 106px; }
+  .project-row { grid-template-columns: minmax(210px, 1.3fr) minmax(120px, 0.8fr) auto 126px; }
   .project-time { display: none; }
   .search-box { width: 205px; }
   .discovery-card { grid-template-columns: 60px minmax(180px, 1fr) auto; }

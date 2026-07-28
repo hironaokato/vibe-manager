@@ -24,11 +24,19 @@ pub fn save_settings(
     if settings.launch_at_login {
         app.autolaunch()
             .enable()
-            .map_err(|error| format!("ログイン時起動を有効にできません: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "Could not enable launch at login: {error} / ログイン時起動を有効にできません: {error}"
+                )
+            })?;
     } else {
         app.autolaunch()
             .disable()
-            .map_err(|error| format!("ログイン時起動を無効にできません: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "Could not disable launch at login: {error} / ログイン時起動を無効にできません: {error}"
+                )
+            })?;
     }
     state.save_settings(&app, settings)
 }
@@ -126,10 +134,13 @@ pub fn open_discovered_url(
 ) -> Result<(), String> {
     let candidate = state
         .discovery_candidate(&key)
-        .ok_or_else(|| "検出候補が見つかりません。再スキャンしてください。".to_string())?;
+        .ok_or_else(|| {
+            "Discovery candidate not found. Please rescan. / 検出候補が見つかりません。再スキャンしてください。"
+                .to_string()
+        })?;
     app.opener()
         .open_url(candidate.url, None::<&str>)
-        .map_err(|error| format!("URLを開けません: {error}"))
+        .map_err(|error| format!("Could not open URL: {error} / URLを開けません: {error}"))
 }
 
 #[tauri::command]
@@ -141,7 +152,9 @@ pub fn open_project_directory(
     let project = project_by_id(&state.snapshot(), &id)?;
     app.opener()
         .open_path(project.directory, None::<&str>)
-        .map_err(|error| format!("フォルダーを開けません: {error}"))
+        .map_err(|error| {
+            format!("Could not open folder: {error} / フォルダーを開けません: {error}")
+        })
 }
 
 #[tauri::command]
@@ -151,12 +164,13 @@ pub fn open_project_url(
     id: String,
 ) -> Result<(), String> {
     let project = project_by_id(&state.snapshot(), &id)?;
-    let url = project
-        .url
-        .ok_or_else(|| "このプロジェクトにはURLが登録されていません。".to_string())?;
+    let url = project.url.ok_or_else(|| {
+        "No URL is registered for this project. / このプロジェクトにはURLが登録されていません。"
+            .to_string()
+    })?;
     app.opener()
         .open_url(url, None::<&str>)
-        .map_err(|error| format!("URLを開けません: {error}"))
+        .map_err(|error| format!("Could not open URL: {error} / URLを開けません: {error}"))
 }
 
 #[tauri::command]
@@ -177,7 +191,7 @@ fn project_by_id(snapshot: &DashboardSnapshot, id: &str) -> Result<ProjectRecord
         .iter()
         .find(|project| project.id == id)
         .cloned()
-        .ok_or_else(|| "プロジェクトが見つかりません。".to_string())
+        .ok_or_else(|| "Project not found. / プロジェクトが見つかりません。".to_string())
 }
 
 #[cfg(windows)]
@@ -193,7 +207,9 @@ fn spawn_terminal(directory: &str) -> Result<(), String> {
         .current_dir(directory)
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("ターミナルを開けません: {error}"))
+        .map_err(|error| {
+            format!("Could not open terminal: {error} / ターミナルを開けません: {error}")
+        })
 }
 
 #[cfg(target_os = "macos")]
@@ -202,7 +218,9 @@ fn spawn_terminal(directory: &str) -> Result<(), String> {
         .args(["-a", "Terminal", directory])
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("ターミナルを開けません: {error}"))
+        .map_err(|error| {
+            format!("Could not open terminal: {error} / ターミナルを開けません: {error}")
+        })
 }
 
 #[cfg(not(any(windows, target_os = "macos")))]
@@ -211,7 +229,9 @@ fn spawn_terminal(directory: &str) -> Result<(), String> {
         .current_dir(directory)
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("ターミナルを開けません: {error}"))
+        .map_err(|error| {
+            format!("Could not open terminal: {error} / ターミナルを開けません: {error}")
+        })
 }
 
 #[cfg(windows)]
@@ -220,7 +240,11 @@ fn spawn_editor(directory: &str) -> Result<(), String> {
         .arg(directory)
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("VS Codeを開けません。codeコマンドを確認してください: {error}"))
+        .map_err(|error| {
+            format!(
+                "Could not open VS Code. Check the code command: {error} / VS Codeを開けません。codeコマンドを確認してください: {error}"
+            )
+        })
 }
 
 #[cfg(target_os = "macos")]
@@ -232,7 +256,7 @@ fn spawn_editor(directory: &str) -> Result<(), String> {
         .args(["-a", "Visual Studio Code", directory])
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("VS Codeを開けません: {error}"))
+        .map_err(|error| format!("Could not open VS Code: {error} / VS Codeを開けません: {error}"))
 }
 
 #[cfg(not(any(windows, target_os = "macos")))]
@@ -241,5 +265,5 @@ fn spawn_editor(directory: &str) -> Result<(), String> {
         .arg(Path::new(directory))
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("VS Codeを開けません: {error}"))
+        .map_err(|error| format!("Could not open VS Code: {error} / VS Codeを開けません: {error}"))
 }

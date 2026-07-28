@@ -21,18 +21,21 @@ const policies: Array<{
 }> = [
   {
     value: "ask",
-    title: "確認してから復元",
-    description: "前回動いていたアプリを一覧にし、選んで起動します。",
+    title: "Ask before restoring / 確認してから復元",
+    description:
+      "Review previously running apps and choose what to start. / 前回動いていたアプリを一覧にし、選んで起動します。",
   },
   {
     value: "auto",
-    title: "自動で復元",
-    description: "自動復元に指定したプロジェクトをすぐ起動します。",
+    title: "Restore automatically / 自動で復元",
+    description:
+      "Immediately starts projects configured for automatic restore. / 自動復元に指定したプロジェクトをすぐ起動します。",
   },
   {
     value: "manual",
-    title: "常に手動",
-    description: "状態だけ記録し、プロジェクトは自動で起動しません。",
+    title: "Always manual / 常に手動",
+    description:
+      "Records status without automatically starting projects. / 状態だけ記録し、プロジェクトは自動で起動しません。",
   },
 ];
 
@@ -55,7 +58,10 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
           <span className="beta-chip">LOCAL</span>
         </div>
 
-        <div className="step-dots" aria-label={`セットアップ ${step + 1}/3`}>
+        <div
+          className="step-dots"
+          aria-label={`Setup / セットアップ ${step + 1}/3`}
+        >
           {[0, 1, 2].map((index) => (
             <span key={index} className={index <= step ? "active" : ""} />
           ))}
@@ -68,23 +74,30 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
             </div>
             <p className="eyebrow">WELCOME</p>
             <h1>
-              ローカルアプリを、
+              Never lose track
               <br />
-              もう見失わない。
+              of local apps.
+              <small className="bilingual-heading">
+                ローカルアプリを、もう見失わない。
+              </small>
             </h1>
             <p className="onboarding-copy">
+              Discover development servers running on localhost, then start,
+              stop, and monitor them in one place. Vibe Manager remembers what
+              was running even after a PC restart.
+              <br />
               localhostで動く開発サーバーを見つけ、一か所で起動・停止・監視。
               PC再起動後も、何が動いていたかを覚えています。
             </p>
             <div className="feature-row">
               <span>
-                <CheckCircle2 size={16} /> 状態を記録
+                <CheckCircle2 size={16} /> Remember status / 状態を記録
               </span>
               <span>
-                <CheckCircle2 size={16} /> 自動検出
+                <CheckCircle2 size={16} /> Auto discovery / 自動検出
               </span>
               <span>
-                <CheckCircle2 size={16} /> 安全に復元
+                <CheckCircle2 size={16} /> Safe restore / 安全に復元
               </span>
             </div>
           </div>
@@ -96,15 +109,23 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
               <ShieldCheck size={25} />
             </div>
             <p className="eyebrow">STARTUP</p>
-            <h1>Vibe Managerの起動</h1>
+            <h1>Starting Vibe Manager / Vibe Managerの起動</h1>
             <p className="onboarding-copy">
+              Keep Vibe Manager in the tray or menu bar after login so you can
+              check the current status at any time.
+              <br />
               ログイン後にトレイ／メニューバーへ常駐させると、
               いつでも現在の状態を確認できます。
             </p>
             <label className="choice-card toggle-choice">
               <div>
-                <strong>ログイン時に自動起動</strong>
-                <span>画面は開かず、トレイに静かに常駐します。</span>
+                <strong>
+                  Launch automatically at login / ログイン時に自動起動
+                </strong>
+                <span>
+                  Runs quietly in the tray without opening the window. /
+                  画面は開かず、トレイに静かに常駐します。
+                </span>
               </div>
               <input
                 type="checkbox"
@@ -113,7 +134,10 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
               />
               <span className="switch" />
             </label>
-            <p className="hint">この設定はあとから設定画面で変更できます。</p>
+            <p className="hint">
+              You can change this later in Settings. /
+              この設定はあとから設定画面で変更できます。
+            </p>
           </div>
         )}
 
@@ -123,8 +147,11 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
               <RotateCcw size={24} />
             </div>
             <p className="eyebrow">RESTORE</p>
-            <h1>標準の復元方法</h1>
+            <h1>Default restore behavior / 標準の復元方法</h1>
             <p className="onboarding-copy">
+              Choose the initial setting for newly registered projects. You can
+              change it for each project.
+              <br />
               新しく登録するプロジェクトの初期設定を選びます。
               プロジェクトごとに変更できます。
             </p>
@@ -158,7 +185,7 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
               className="text-button"
               onClick={() => setStep((current) => current - 1)}
             >
-              戻る
+              Back / 戻る
             </button>
           ) : (
             <span />
@@ -169,7 +196,7 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
               className="primary-button"
               onClick={() => setStep((current) => current + 1)}
             >
-              続ける <ArrowRight size={17} />
+              Continue / 続ける <ArrowRight size={17} />
             </button>
           ) : (
             <button
@@ -187,7 +214,9 @@ export function Onboarding({ busy, onComplete }: OnboardingProps) {
                 })
               }
             >
-              {busy ? "設定しています…" : "セットアップを完了"}
+              {busy
+                ? "Setting up… / 設定しています…"
+                : "Finish setup / セットアップを完了"}
               {!busy && <ArrowRight size={17} />}
             </button>
           )}

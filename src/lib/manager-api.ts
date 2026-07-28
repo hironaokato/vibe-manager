@@ -47,5 +47,5 @@ export const managerApi = {
 export function errorMessage(error: unknown): string {
   if (typeof error === "string") return error;
   if (error instanceof Error) return error.message;
-  return "予期しないエラーが発生しました。";
+  return "An unexpected error occurred. / 予期しないエラーが発生しました。";
 }

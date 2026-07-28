@@ -35,17 +35,22 @@ export function SettingsModal({
 
   return (
     <Modal
-      title="設定"
-      subtitle="常駐方法と、新しいプロジェクトの標準動作を変更します。"
+      title="Settings / 設定"
+      subtitle="Configure background behavior and defaults for new projects. / 常駐方法と、新しいプロジェクトの標準動作を変更します。"
       onClose={onClose}
     >
       <div className="settings-body">
         <section className="settings-section">
-          <h3>システム</h3>
+          <h3>System / システム</h3>
           <label className="settings-row">
             <span>
-              <strong>ログイン時にVibe Managerを起動</strong>
-              <small>ウィンドウは開かず、トレイに常駐します。</small>
+              <strong>
+                Launch Vibe Manager at login / ログイン時にVibe Managerを起動
+              </strong>
+              <small>
+                Runs in the tray without opening the window. /
+                ウィンドウは開かず、トレイに常駐します。
+              </small>
             </span>
             <input
               type="checkbox"
@@ -57,11 +62,17 @@ export function SettingsModal({
         </section>
 
         <section className="settings-section">
-          <h3>自動検出</h3>
+          <h3>Automatic discovery / 自動検出</h3>
           <label className="settings-row">
             <span>
-              <strong>ローカル開発サーバーを検出</strong>
-              <small>待受ポートとプロセスを約10秒ごとに確認します。</small>
+              <strong>
+                Discover local development servers /
+                ローカル開発サーバーを検出
+              </strong>
+              <small>
+                Checks listening ports and processes about every 10 seconds. /
+                待受ポートとプロセスを約10秒ごとに確認します。
+              </small>
             </span>
             <input
               type="checkbox"
@@ -72,8 +83,14 @@ export function SettingsModal({
           </label>
           <label className={`settings-row ${!discoveryEnabled ? "disabled" : ""}`}>
             <span>
-              <strong>高確度の候補を自動登録</strong>
-              <small>確認画面を省きます。最初はオフがおすすめです。</small>
+              <strong>
+                Auto-register high-confidence candidates /
+                高確度の候補を自動登録
+              </strong>
+              <small>
+                Skips confirmation. Keeping this off initially is recommended. /
+                確認画面を省きます。最初はオフがおすすめです。
+              </small>
             </span>
             <input
               type="checkbox"
@@ -87,63 +104,76 @@ export function SettingsModal({
           </label>
           <label className="field workspace-roots-field">
             <span>
-              監視する作業フォルダー <em>任意</em>
+              Workspace folders to watch / 監視する作業フォルダー{" "}
+              <em>Optional / 任意</em>
             </span>
             <textarea
               value={workspaceRoots}
               onChange={(event) => setWorkspaceRoots(event.target.value)}
               placeholder={
-                "1行に1フォルダー\nC:\\Users\\name\\Documents\\GitHub\n/Users/name/Projects"
+                "One folder per line / 1行に1フォルダー\nC:\\Users\\name\\Documents\\GitHub\n/Users/name/Projects"
               }
               rows={3}
             />
             <small>
+              When specified, only servers running under these folders become
+              candidates. If left blank, development processes such as Node.js
+              are detected. /
               指定すると、その配下で動くサーバーだけを候補にします。空欄ではNode.jsなどの開発用プロセスを判定します。
             </small>
           </label>
           {ignoredDiscoveryCount > 0 && (
             <div className="ignored-discovery-row">
-              <span>非表示にした候補: {ignoredDiscoveryCount}件</span>
+              <span>
+                Hidden candidates: {ignoredDiscoveryCount} /
+                非表示にした候補: {ignoredDiscoveryCount}件
+              </span>
               <button
                 type="button"
                 className="text-button"
                 disabled={busy}
                 onClick={() => void onClearIgnored()}
               >
-                非表示をリセット
+                Reset hidden / 非表示をリセット
               </button>
             </div>
           )}
         </section>
 
         <section className="settings-section">
-          <h3>新規プロジェクト</h3>
+          <h3>New projects / 新規プロジェクト</h3>
           <label className="field">
-            <span>標準の復元方法</span>
+            <span>Default restore behavior / 標準の復元方法</span>
             <select
               value={defaultPolicy}
               onChange={(event) =>
                 setDefaultPolicy(event.target.value as StartupPolicy)
               }
             >
-              <option value="ask">確認してから復元</option>
-              <option value="auto">自動で復元</option>
-              <option value="manual">常に手動</option>
+              <option value="ask">
+                Ask before restoring / 確認してから復元
+              </option>
+              <option value="auto">Restore automatically / 自動で復元</option>
+              <option value="manual">Always manual / 常に手動</option>
             </select>
           </label>
         </section>
 
         <section className="settings-note">
-          <strong>ウィンドウを閉じても監視は続きます</strong>
+          <strong>
+            Monitoring continues after closing the window /
+            ウィンドウを閉じても監視は続きます
+          </strong>
           <p>
-            完全に終了する場合は、トレイ／メニューバーのメニューから
-            「Vibe Managerを終了」を選択してください。
+            To quit completely, choose “Quit Vibe Manager / Vibe
+            Managerを終了” from the tray or menu bar. /
+            完全に終了する場合は、トレイ／メニューバーのメニューから終了を選択してください。
           </p>
         </section>
       </div>
       <footer className="modal-actions">
         <button type="button" className="secondary-button" onClick={onClose}>
-          キャンセル
+          Cancel / キャンセル
         </button>
         <button
           type="button"
@@ -167,7 +197,7 @@ export function SettingsModal({
             })
           }
         >
-          {busy ? "保存しています…" : "設定を保存"}
+          {busy ? "Saving… / 保存しています…" : "Save settings / 設定を保存"}
         </button>
       </footer>
     </Modal>

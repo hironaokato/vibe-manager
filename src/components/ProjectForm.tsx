@@ -44,7 +44,8 @@ export function ProjectForm({
     const selected = await open({
       directory: true,
       multiple: false,
-      title: "プロジェクトの作業フォルダーを選択",
+      title:
+        "Select the project workspace folder / プロジェクトの作業フォルダーを選択",
     });
     if (typeof selected === "string") setDirectory(selected);
   }
@@ -65,8 +66,12 @@ export function ProjectForm({
 
   return (
     <Modal
-      title={project ? "プロジェクトを編集" : "プロジェクトを追加"}
-      subtitle="実際にターミナルで使用している起動情報を登録します。"
+      title={
+        project
+          ? "Edit project / プロジェクトを編集"
+          : "Add project / プロジェクトを追加"
+      }
+      subtitle="Register the launch details you use in the terminal. / 実際にターミナルで使用している起動情報を登録します。"
       onClose={onClose}
     >
       <form className="project-form" onSubmit={submit}>
@@ -74,17 +79,22 @@ export function ProjectForm({
           <div className="discovery-form-note">
             <Radar size={18} />
             <div>
-              <strong>起動中のサーバーを取り込みます</strong>
+              <strong>
+                Importing a running server /
+                起動中のサーバーを取り込みます
+              </strong>
               <p>
-                PID {initialInput.externalPid} を監視対象に追加します。検出したコマンドは
-                次回の起動にも使えるよう、必要に応じて編集してください。
+                PID {initialInput.externalPid} will be added to monitoring.
+                Review the detected command so it can be reused for the next
+                launch. / PID {initialInput.externalPid} を監視対象に追加します。
+                検出したコマンドは次回の起動にも使えるよう、必要に応じて編集してください。
               </p>
             </div>
           </div>
         )}
 
         <label className="field">
-          <span>プロジェクト名</span>
+          <span>Project name / プロジェクト名</span>
           <input
             autoFocus
             value={name}
@@ -95,7 +105,7 @@ export function ProjectForm({
         </label>
 
         <label className="field">
-          <span>作業ディレクトリ</span>
+          <span>Working directory / 作業ディレクトリ</span>
           <div className="input-with-action">
             <input
               value={directory}
@@ -107,7 +117,7 @@ export function ProjectForm({
               type="button"
               className="input-action"
               onClick={() => void chooseDirectory()}
-              aria-label="フォルダーを選ぶ"
+              aria-label="Choose folder / フォルダーを選ぶ"
             >
               <FolderOpen size={18} />
             </button>
@@ -115,7 +125,7 @@ export function ProjectForm({
         </label>
 
         <label className="field">
-          <span>起動コマンド</span>
+          <span>Launch command / 起動コマンド</span>
           <input
             className="mono"
             value={command}
@@ -123,12 +133,15 @@ export function ProjectForm({
             placeholder="npm run dev"
             required
           />
-          <small>Windowsではcmd、macOSではzshを使って実行します。</small>
+          <small>
+            Runs with cmd on Windows and zsh on macOS. /
+            Windowsではcmd、macOSではzshを使って実行します。
+          </small>
         </label>
 
         <label className="field">
           <span>
-            ローカルURL <em>任意</em>
+            Local URL / ローカルURL <em>Optional / 任意</em>
           </span>
           <input
             value={url}
@@ -139,13 +152,13 @@ export function ProjectForm({
         </label>
 
         <fieldset className="field policy-field">
-          <legend>PC再起動後の扱い</legend>
+          <legend>After a PC restart / PC再起動後の扱い</legend>
           <div className="segmented-control">
             {(
               [
-                ["auto", "自動復元"],
-                ["ask", "確認する"],
-                ["manual", "手動のみ"],
+                ["auto", "Auto / 自動復元"],
+                ["ask", "Ask / 確認する"],
+                ["manual", "Manual / 手動のみ"],
               ] as Array<[StartupPolicy, string]>
             ).map(([value, label]) => (
               <button
@@ -162,10 +175,14 @@ export function ProjectForm({
 
         <footer className="modal-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
-            キャンセル
+            Cancel / キャンセル
           </button>
           <button type="submit" className="primary-button" disabled={busy}>
-            {busy ? "保存しています…" : project ? "変更を保存" : "追加する"}
+            {busy
+              ? "Saving… / 保存しています…"
+              : project
+                ? "Save changes / 変更を保存"
+                : "Add / 追加する"}
           </button>
         </footer>
       </form>

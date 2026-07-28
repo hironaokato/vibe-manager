@@ -33,7 +33,7 @@ export function Modal({
           <button
             type="button"
             className="icon-button"
-            aria-label="閉じる"
+            aria-label="Close / 閉じる"
             onClick={onClose}
           >
             <X size={18} />

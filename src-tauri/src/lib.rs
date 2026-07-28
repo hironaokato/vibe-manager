@@ -27,10 +27,20 @@ pub fn run() {
             let state = AppState::load(app.handle())?;
             app.manage(state.clone());
 
-            let open_item =
-                MenuItem::with_id(app, "open", "Vibe Managerを開く", true, None::<&str>)?;
-            let quit_item =
-                MenuItem::with_id(app, "quit", "Vibe Managerを終了", true, None::<&str>)?;
+            let open_item = MenuItem::with_id(
+                app,
+                "open",
+                "Open Vibe Manager / Vibe Managerを開く",
+                true,
+                None::<&str>,
+            )?;
+            let quit_item = MenuItem::with_id(
+                app,
+                "quit",
+                "Quit Vibe Manager / Vibe Managerを終了",
+                true,
+                None::<&str>,
+            )?;
             let menu = Menu::with_items(app, &[&open_item, &quit_item])?;
 
             TrayIconBuilder::with_id("main")
