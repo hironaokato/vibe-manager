@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Vibe Manager",
+  "version": "0.2.1",
+  "identifier": "app.vibemanager.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Vibe Manager",
+        "width": 1080,
+        "height": 760,
+        "minWidth": 860,
+        "minHeight": 620,
+        "center": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "shortDescription": "Keep track of local development apps",
+    "longDescription": "Vibe Manager remembers, starts, stops, restores, and monitors local development applications from the Windows system tray or macOS menu bar.",
+    "windows": {
+      "allowDowngrades": false,
+      "nsis": {
+        "languages": ["Japanese"],
+        "installMode": "currentUser",
+        "installerHooks": "./windows/installer-hooks.nsh"
+      }
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

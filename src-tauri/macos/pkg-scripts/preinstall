@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+APP_PATH="/Applications/Vibe Manager.app"
+BINARY_PATH="$APP_PATH/Contents/MacOS/vibe-manager"
+
+# Ask a running old version to quit before removing its application bundle.
+# Project registrations, settings, and logs live under Application Support and
+# are intentionally not removed.
+if pgrep -f "$BINARY_PATH" >/dev/null 2>&1; then
+  osascript -e 'tell application id "app.vibemanager.desktop" to quit' >/dev/null 2>&1 || true
+
+  attempts=0
+  while pgrep -f "$BINARY_PATH" >/dev/null 2>&1 && [ "$attempts" -lt 10 ]; do
+    sleep 1
+    attempts=$((attempts + 1))
+  done
+
+  if pgrep -f "$BINARY_PATH" >/dev/null 2>&1; then
+    echo "Vibe Manager is still running. Quit it from the menu bar and run the installer again." >&2
+    exit 20
+  fi
+fi
+
+if [ -d "$APP_PATH" ]; then
+  rm -rf "$APP_PATH"
+fi
+
+exit 0

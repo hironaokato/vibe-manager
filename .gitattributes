@@ -1,0 +1,14 @@
+* text=auto
+
+# These files are executed on macOS and must retain Unix line endings.
+*.sh text eol=lf
+src-tauri/macos/pkg-scripts/* text eol=lf
+
+# Keep Windows installer scripts native on Windows checkouts.
+*.ps1 text eol=crlf
+*.nsh text eol=crlf
+
+# Binary application assets.
+*.icns binary
+*.ico binary
+*.png binary
