@@ -181,9 +181,22 @@ try {
         }
     }
 
-    $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $finalInstaller
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    $installerStream = $null
+    try {
+        $installerStream = [System.IO.File]::OpenRead($finalInstaller)
+        $hashBytes = $sha256.ComputeHash($installerStream)
+        $hash = [System.BitConverter]::ToString($hashBytes).Replace("-", "")
+    }
+    finally {
+        if ($installerStream) {
+            $installerStream.Dispose()
+        }
+        $sha256.Dispose()
+    }
+
     Write-Output "Clean-upgrade installer: $finalInstaller"
-    Write-Output "SHA256: $($hash.Hash)"
+    Write-Output "SHA256: $hash"
 }
 finally {
     Pop-Location
